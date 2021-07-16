@@ -1,0 +1,37 @@
+import re, os, sys
+# define a function to read fasta file.
+
+
+def ReadFastaFile(FileName):
+    if os.path.exists(FileName)==False:
+        print("File not found...")
+        sys.exit(1)
+    with open(FileName) as f:
+        records=f.read()
+    if re.search('>', records)==None:
+        print("File not in fasta format")
+        sys.exit(1)
+    records=records.split('>')[1:]
+    fasta_sequences=[]
+    for fasta in records:
+        array = fasta.split('\n')
+        header, sequence = array[0].split()[0], \
+                           re.sub('[^ACGTU-]',
+                                  '-', ''.join(array[1:]).upper())
+        header_array = header.split('|')
+        name = header_array[0]
+        label = header_array[1] if len(header_array) >= 2 else '0'
+        label_train = header_array[2] if len(header_array) >= 3 else 'training'
+        sequence = re.sub('U', 'T', sequence)
+        fasta_sequences.append([name, sequence, label, label_train])
+    return fasta_sequences
+
+
+
+# define main function to call this function
+
+if __name__=='-__main__':
+    FileName='SampleNucleotidefasta.fasta'
+    ReadFastaFile(FileName)
+
+    #Thanks for watching....
