@@ -1,0 +1,55 @@
+import re, os,sys
+from collections import Counter
+
+# Will define two functions....
+#1. Reading Fasta File
+#2. Generating Amino Acid composition of Protein Fasta File.
+
+def ReadFasta(FileName):
+    if not os.path.exists(FileName):
+        print('Error: "' + FileName + '" does not exist.')
+        sys.exit(1)
+    with open(FileName) as f:
+        records = f.read()
+    if re.search('>', records) is None:
+        print('The input file seems not in fasta format.')
+        sys.exit(1)
+    records = records.split('>')[1:]
+    myFasta = []
+    for fasta in records:
+        array = fasta.split('\n')
+        name, sequence = array[0].split()[0], re.sub('[^ARNDCQEGHILKMFPSTWYV-]', '-', ''.join(array[1:]).upper())
+        myFasta.append([name, sequence])
+    return myFasta
+
+def AAC(FastaFile):
+    AA= 'ACDEFGHIKLMNPQRSTVWY'
+    encodings=[]
+    header=['#']
+    for i in AA:
+        header.append(i)
+    encodings.append(header)
+    fastas=ReadFasta(FastaFile)
+    for i in fastas:
+        name, sequence=i[0], re.sub('-','',i[1])
+        count=Counter(sequence)
+        for key in count:
+            count[key]=count[key]/len(sequence)
+        code=[name]
+        for aa in AA:
+            code.append(count[aa])
+        encodings.append(code)
+    return encodings
+
+
+# create a main function to generate AAC
+if __name__=='__main__':
+    FastaFile='Sample.Fasta'
+    Encodings=AAC(FastaFile)
+    # Create a file / open a file to save the feature vector of the AAC
+    with open ('AAC.txt', 'w') as Fin:
+        for each in Encodings:
+            Fin.write(str(each))
+            Fin.write('\n')
+    #....
+    #Thanks for watching....
